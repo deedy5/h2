@@ -8,7 +8,6 @@ use std::{
         atomic::{AtomicUsize, Ordering},
         Arc,
     },
-    thread,
 };
 use tokio::net::{TcpListener, TcpStream};
 
@@ -58,7 +57,7 @@ impl Server {
     }
 
     fn addr(&self) -> SocketAddr {
-        self.addr.clone()
+        self.addr
     }
 
     fn request_count(&self) -> usize {

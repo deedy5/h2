@@ -2,7 +2,7 @@ use crate::SendFrame;
 
 use h2::frame::{self, Frame};
 use h2::proto::Error;
-use h2::{self, SendError};
+use h2::SendError;
 
 use futures::future::poll_fn;
 use futures::{ready, Stream, StreamExt};
@@ -56,7 +56,7 @@ struct Inner {
     closed: bool,
 }
 
-const PREFACE: &'static [u8] = b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
+const PREFACE: &[u8] = b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
 
 /// Create a new mock and handle
 pub fn new() -> (Mock, Handle) {
@@ -148,7 +148,7 @@ impl Handle {
         poll_fn(move |cx| {
             while buf.has_remaining() {
                 let res = Pin::new(self.codec.get_mut())
-                    .poll_write(cx, &mut buf.chunk())
+                    .poll_write(cx, buf.chunk())
                     .map_err(|e| panic!("write err={:?}", e));
 
                 let n = ready!(res).unwrap();

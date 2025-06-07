@@ -1,5 +1,3 @@
-use h2;
-
 use bytes::{BufMut, Bytes};
 use futures::ready;
 use std::future::Future;
@@ -36,7 +34,7 @@ pub async fn yield_once() {
 pub fn wait_for_capacity(stream: h2::SendStream<Bytes>, target: usize) -> WaitForCapacity {
     WaitForCapacity {
         stream: Some(stream),
-        target: target,
+        target,
     }
 }
 
@@ -66,7 +64,7 @@ impl Future for WaitForCapacity {
             assert_ne!(act, 0);
 
             if act >= self.target {
-                return Poll::Ready(self.stream.take().unwrap().into());
+                return Poll::Ready(self.stream.take().unwrap());
             }
         }
     }
