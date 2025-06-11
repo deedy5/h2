@@ -413,7 +413,7 @@ where
     pub async fn accept(
         &mut self,
     ) -> Option<Result<(Request<RecvStream>, SendResponse<B>), crate::Error>> {
-        futures_util::future::poll_fn(move |cx| self.poll_accept(cx)).await
+        crate::poll_fn(move |cx| self.poll_accept(cx)).await
     }
 
     #[doc(hidden)]
@@ -514,12 +514,6 @@ where
         self.connection.poll(cx).map_err(Into::into)
     }
 
-    #[doc(hidden)]
-    #[deprecated(note = "renamed to poll_closed")]
-    pub fn poll_close(&mut self, cx: &mut Context) -> Poll<Result<(), crate::Error>> {
-        self.poll_closed(cx)
-    }
-
     /// Sets the connection to a GOAWAY state.
     ///
     /// Does not terminate the connection. Must continue being polled to close
@@ -557,6 +551,11 @@ where
     /// This may only be called once. Calling multiple times will return `None`.
     pub fn ping_pong(&mut self) -> Option<PingPong> {
         self.connection.take_user_pings().map(PingPong::new)
+    }
+
+    /// Checks if there are any streams
+    pub fn has_streams(&self) -> bool {
+        self.connection.has_streams()
     }
 
     /// Returns the maximum number of concurrent streams that may be initiated
@@ -969,7 +968,7 @@ impl Builder {
     ///
     /// This function panics if `max` is larger than `u32::MAX`.
     pub fn max_send_buffer_size(&mut self, max: usize) -> &mut Self {
-        assert!(max <= std::u32::MAX as usize);
+        assert!(max <= u32::MAX as usize);
         self.max_send_buffer_size = max;
         self
     }
