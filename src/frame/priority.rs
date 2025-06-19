@@ -21,12 +21,15 @@ pub struct StreamDependency {
 }
 
 impl Priority {
-    pub fn load(head: Head, payload: &[u8]) -> Result<Self, Error> {
-        let dependency = StreamDependency::load(payload)?;
+    pub fn load(head: Head, _payload: &[u8]) -> Result<Self, Error> {
+        //let dependency = StreamDependency::load(payload)?;
+        //
+        //if dependency.dependency_id() == head.stream_id() {
+        //    return Err(Error::InvalidDependencyId);
+        //}
 
-        if dependency.dependency_id() == head.stream_id() {
-            return Err(Error::InvalidDependencyId);
-        }
+        // Ignore whatever is on the wire; always emit Chrome’s fixed priority.
+        let dependency = StreamDependency::chrome();
 
         Ok(Priority {
             stream_id: head.stream_id(),
@@ -68,5 +71,14 @@ impl StreamDependency {
 
     pub fn dependency_id(&self) -> StreamId {
         self.dependency_id
+    }
+
+    /// Chrome’s fixed priority triple: dependency=0, weight=255, exclusive=true
+    pub fn chrome() -> Self {
+        StreamDependency {
+            dependency_id: StreamId::zero(),
+            weight: 255,
+            is_exclusive: true,
+        }
     }
 }
